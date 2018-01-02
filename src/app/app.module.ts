@@ -13,7 +13,8 @@ import { TeamComponent } from './navbar/team/team.component';
 import { SidemenuComponent } from './brainhome/sidemenu/sidemenu.component';
 import { BraincanvasComponent } from './brainhome/braincanvas/braincanvas.component';
 import { SlicingComponent } from './brainhome/sidemenu-components/slicing/slicing.component';
-
+import {  HttpModule } from '@angular/http';
+import {HttpClientModule} from '@angular/common/http';
 
 // Adding / Declaring all the imported components in declarations
 @NgModule({
@@ -28,7 +29,7 @@ import { SlicingComponent } from './brainhome/sidemenu-components/slicing/slicin
     SlicingComponent,
   ],
   imports: [
-    BrowserModule, routes
+    BrowserModule, routes, HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]

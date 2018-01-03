@@ -1,0 +1,58 @@
+
+changes user to postgres
+sudo su - postgres 
+
+starts sql
+psql
+
+connects to brain
+\c brain
+
+shows tables
+\dt
+
+SELECT * FROM braintbl LIMIT 10;
+
+dumps to file from bash
+pg_dump -h localhost --no-acl -U postgres --format=plain --no-owner brain > brain.sql
+
+password: postgres
+google cloud password: lab416rox
+
+
+***configuring access for ip connections***
+
+1 get ip address of pc. example of my pc worked.
+
+$ifconfig
+
+146.244.148.113
+
+2. add address to authorization page at
+
+https://console.cloud.google.com/sql/instances/brain/databases?project=brain-186719
+
+3.
+
+install postgres sql client
+
+UBUNTU:
+sudo apt-get update
+sudo apt-get install postgresql-client
+
+MAC:
+???
+
+4.
+
+in a console type
+$psql "sslmode=disable dbname=brain user=postgres hostaddr=35.197.111.52"
+
+quotes are needed!
+password is: lab416rox
+
+5. Test connection by entering the command
+SELECT * FROM braintbl LIMIT 10;
+
+If you see a table, congratulations, you are connected to the google cloud sql database!
+

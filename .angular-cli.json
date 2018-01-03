@@ -22,9 +22,9 @@
         "styles.css"
       ],
       "scripts": [
-        "./node_modules/three/build/three.js",
-        "./node_modules/three/build/three.module.js",
-        "./node_modules/three/examples/js/renderers/CanvasRenderer.js"
+        "..//node_modules/three/build/three.js",
+        "../node_modules/three/build/three.module.js",
+        "../node_modules/three/examples/js/renderers/CanvasRenderer.js"
       ],
       "environmentSource": "environments/environment.ts",
       "environments": {

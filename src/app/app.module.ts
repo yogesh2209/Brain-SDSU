@@ -13,7 +13,9 @@ import { TeamComponent } from './navbar/team/team.component';
 import { SidemenuComponent } from './brainhome/sidemenu/sidemenu.component';
 import { BraincanvasComponent } from './brainhome/braincanvas/braincanvas.component';
 import { SlicingComponent } from './brainhome/sidemenu-components/slicing/slicing.component';
-import {HttpClientModule} from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
+import { HttpModule } from '@angular/http'; //
+import { BrainDataService } from './services/brain-data.service';
 
 
 // Adding / Declaring all the imported components in declarations
@@ -29,9 +31,9 @@ import {HttpClientModule} from '@angular/common/http';
     SlicingComponent
   ],
   imports: [
-    BrowserModule, routes, HttpClientModule
+    BrowserModule, routes, HttpClientModule, HttpModule
   ],
-  providers: [],
+  providers: [BrainDataService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -4,6 +4,8 @@ import * as THREE from 'three';
 import {Http} from '@angular/http';
 import 'three/examples/js/controls/OrbitControls';
 import 'three/examples/js/loaders/ColladaLoader';
+import { BrainDataService } from './../../services/brain-data.service';
+import { BrainData } from './../../models/brain-data'
 
 @Component({
   selector: 'app-braincanvas',
@@ -21,11 +23,17 @@ export class BraincanvasComponent implements AfterViewInit {
   public texture;
   public geometry = new THREE.Geometry();
 
+  private brainData: BrainData[] = [];
+
   @ViewChild('canvas1') canvas1;
   public group = new THREE.Group();
-  constructor() {
+
+  constructor(private brainServ: BrainDataService) {}
+
+  ngOnInit() {
     this.render = this.render.bind(this);
   }
+
   public get canvas(): HTMLCanvasElement {
     return this.canvas1.nativeElement;
   }
@@ -63,9 +71,19 @@ export class BraincanvasComponent implements AfterViewInit {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.setClearColor(0xffffff, 1);
     this.renderer.autoClear = true;
+
+    //Get all lists from server and update the lists property
+    this.brainServ.getTen().subscribe(
+      response => this.brainData = response)
+
+    console.log(this.brainData);
+
+
+    //replace me with BrainData service
     for (let i = 0; i < 900; i++) {
       this.geometry.vertices.push(new THREE.Vector3(this.getRandomInt(85), this.getRandomInt(100) , this.getRandomInt(200)));
     }
+
     this.texture = new THREE.TextureLoader().load( 'assets/disc.png' );
     this.material = new THREE.PointsMaterial({size: 24, sizeAttenuation: true, map: this.texture, alphaTest: 0.5, transparent: false});
     this.material.color.setHSL(1.0, 0.6 , 0.4 );

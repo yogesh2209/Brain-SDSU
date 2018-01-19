@@ -21,15 +21,7 @@
       "styles": [
         "styles.css"
       ],
-<<<<<<< HEAD
       "scripts": [],
-=======
-      "scripts": [
-        "..//node_modules/three/build/three.js",
-        "../node_modules/three/build/three.module.js",
-        "../node_modules/three/examples/js/renderers/CanvasRenderer.js"
-      ],
->>>>>>> 179398731721c518d0361a4b275a63729bc5bd96
       "environmentSource": "environments/environment.ts",
       "environments": {
         "dev": "environments/environment.ts",

@@ -12,8 +12,8 @@ client.connect();
 exports.slicer = function(req, res, next) {
     res.send('brain slicer!');
 }
-
-exports.get_ten_points = function(req, res, next) {
+/*
+exports.get_ten_points_old = function(req, res, next) {
   results = []
   const query = client.query("SELECT * FROM braintbl LIMIT 10;", function(err, results) {
     if (err) {
@@ -22,3 +22,31 @@ exports.get_ten_points = function(req, res, next) {
     res.json(results.rows);
   });
 }
+*/
+
+exports.get_ten_points = function(req, res, next) {
+  results = []
+  pg.connect(connection, (err, client, done) => {
+    if(err) {
+      done();
+      console.log(err);
+      return res.status(500).json({success: false, data: err});
+    }
+    const query = client.query("SELECT * FROM braintbl LIMIT 10;")
+    query.on('row', (row) => {
+      for (var k in row) //convert each to int
+      {
+          if (row.hasOwnProperty(k))
+          {
+              row[k] = Number(row[k]);
+          }
+      }
+      results.push(row);
+    });
+    // After all data is returned, close connection and return results
+    query.on('end', () => {
+      done();
+      return res.json(results);
+    });
+  });
+};

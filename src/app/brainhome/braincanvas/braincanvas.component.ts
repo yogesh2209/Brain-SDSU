@@ -1,11 +1,15 @@
 import {Component, AfterViewInit, ElementRef, ViewChild, HostListener, OnInit} from '@angular/core';
 import './js/EnableThreeExamples';
 import * as THREE from 'three';
-import {Http} from '@angular/http';
+//import {Http} from '@angular/http';
 import 'three/examples/js/controls/OrbitControls';
 import 'three/examples/js/loaders/ColladaLoader';
 import { BrainDataService } from './../../services/brain-data.service';
 import { BrainData } from './../../models/brain-data'
+
+//Test express connection
+import { Http, Response, Headers, RequestOptions } from '@angular/http';
+import { error } from 'three';
 
 @Component({
   selector: 'app-braincanvas',
@@ -23,7 +27,7 @@ export class BraincanvasComponent implements AfterViewInit {
   public texture;
   public geometry = new THREE.Geometry();
 
-  private brainData: BrainData[] = [];
+  public brainData: BrainData[] = [];
 
   @ViewChild('canvas1') canvas1;
   public group = new THREE.Group();
@@ -32,8 +36,26 @@ export class BraincanvasComponent implements AfterViewInit {
 
   ngOnInit() {
     this.render = this.render.bind(this);
+    //this.loadBrainData();
+    //this.loadMockBrainData();
+  }
+  public loadMockBrainData() {
+    this.brainData = this.brainServ.getBrainDataMock();
+    console.log('Mock brain data:');
+    console.log(this.brainData);
   }
 
+  public loadBrainData() {
+    //Get all lists from server and update the lists property
+    this.brainServ.getTen()
+      .subscribe(
+        response => {this.brainData = response;
+                     console.log('brain data');
+                     console.log(this.brainData)
+                     console.log(this.brainData.length)}
+      )
+  }
+  
   public get canvas(): HTMLCanvasElement {
     return this.canvas1.nativeElement;
   }
@@ -73,16 +95,21 @@ export class BraincanvasComponent implements AfterViewInit {
     this.renderer.autoClear = true;
 
     //Get all lists from server and update the lists property
-    this.brainServ.getTen().subscribe(
-      response => this.brainData = response)
-
-    console.log(this.brainData);
+    this.loadBrainData();
+    console.log('brain data length: ')
+    console.log(this.brainData.length);
+    for (let i = 0; i < this.brainData.length; i++) {
+      let particle = this.brainData[i]
+      this.geometry.vertices.push(new THREE.Vector3(particle.x, particle.y , particle.z));
+    }
 
 
     //replace me with BrainData service
+    /*
     for (let i = 0; i < 900; i++) {
       this.geometry.vertices.push(new THREE.Vector3(this.getRandomInt(85), this.getRandomInt(100) , this.getRandomInt(200)));
     }
+    */
 
     this.texture = new THREE.TextureLoader().load( 'assets/disc.png' );
     this.material = new THREE.PointsMaterial({size: 24, sizeAttenuation: true, map: this.texture, alphaTest: 0.5, transparent: false});

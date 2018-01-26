@@ -5,5 +5,4 @@ export interface BrainData {
     z: number;
     color: number;
     catagory: number;
-
 }

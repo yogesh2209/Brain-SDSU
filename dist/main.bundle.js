@@ -222,6 +222,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
+//import {Http} from '@angular/http';
 
 
 
@@ -234,6 +235,24 @@ var BraincanvasComponent = (function () {
     }
     BraincanvasComponent.prototype.ngOnInit = function () {
         this.render = this.render.bind(this);
+        //this.loadBrainData();
+        //this.loadMockBrainData();
+    };
+    BraincanvasComponent.prototype.loadMockBrainData = function () {
+        this.brainData = this.brainServ.getBrainDataMock();
+        console.log('Mock brain data:');
+        console.log(this.brainData);
+    };
+    BraincanvasComponent.prototype.loadBrainData = function () {
+        var _this = this;
+        //Get all lists from server and update the lists property
+        this.brainServ.getTen()
+            .subscribe(function (response) {
+            _this.brainData = response;
+            console.log('brain data');
+            console.log(_this.brainData);
+            console.log(_this.brainData.length);
+        });
     };
     Object.defineProperty(BraincanvasComponent.prototype, "canvas", {
         get: function () {
@@ -266,7 +285,6 @@ var BraincanvasComponent = (function () {
         return Math.floor(Math.random() * Math.floor(max));
     };
     BraincanvasComponent.prototype.startRendering = function () {
-        var _this = this;
         this.renderer = new __WEBPACK_IMPORTED_MODULE_2_three__["WebGLRenderer"]({
             canvas: this.canvas,
             antialias: true
@@ -278,12 +296,19 @@ var BraincanvasComponent = (function () {
         this.renderer.setClearColor(0xffffff, 1);
         this.renderer.autoClear = true;
         //Get all lists from server and update the lists property
-        this.brainServ.getTen().subscribe(function (response) { return _this.brainData = response; });
-        console.log(this.brainData);
-        //replace me with BrainData service
-        for (var i = 0; i < 900; i++) {
-            this.geometry.vertices.push(new __WEBPACK_IMPORTED_MODULE_2_three__["Vector3"](this.getRandomInt(85), this.getRandomInt(100), this.getRandomInt(200)));
+        this.loadBrainData();
+        console.log('brain data length: ');
+        console.log(this.brainData.length);
+        for (var i = 0; i < this.brainData.length; i++) {
+            var particle = this.brainData[i];
+            this.geometry.vertices.push(new __WEBPACK_IMPORTED_MODULE_2_three__["Vector3"](particle.x, particle.y, particle.z));
         }
+        //replace me with BrainData service
+        /*
+        for (let i = 0; i < 900; i++) {
+          this.geometry.vertices.push(new THREE.Vector3(this.getRandomInt(85), this.getRandomInt(100) , this.getRandomInt(200)));
+        }
+        */
         this.texture = new __WEBPACK_IMPORTED_MODULE_2_three__["TextureLoader"]().load('assets/disc.png');
         this.material = new __WEBPACK_IMPORTED_MODULE_2_three__["PointsMaterial"]({ size: 24, sizeAttenuation: true, map: this.texture, alphaTest: 0.5, transparent: false });
         this.material.color.setHSL(1.0, 0.6, 0.4);
@@ -774,7 +799,9 @@ var TeamComponent = (function () {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BrainDataService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/esm5/core.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__("../../../http/esm5/http.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map__ = __webpack_require__("../../../../rxjs/_esm5/add/operator/map.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__ = __webpack_require__("../../../../rxjs/_esm5/Observable.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_add_operator_map__ = __webpack_require__("../../../../rxjs/_esm5/add/operator/map.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_rxjs_add_operator_catch__ = __webpack_require__("../../../../rxjs/_esm5/add/operator/catch.js");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -787,16 +814,28 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
+
+
 var BrainDataService = (function () {
     function BrainDataService(http) {
         this.http = http;
         this.serverApi = 'http://localhost:3000';
+        this.BRAINDATA = [{ "catagory": 49, "color": 108, "vertexNumber": 722021, "x": 75, "y": 33, "z": 73 },
+            { "catagory": 49, "color": 110, "vertexNumber": 722022, "x": 76, "y": 33, "z": 73 }];
     }
-    BrainDataService.prototype.getTen = function () {
+    BrainDataService.prototype.getBrainDataMock = function () {
+        return this.BRAINDATA;
+    };
+    BrainDataService.prototype.getTenOld = function () {
         var URI = this.serverApi + "/brainSlicer/ten";
         return this.http.get(URI)
             .map(function (res) { return res.json(); })
-            .map(function (res) { return res.lists; });
+            .map(function (res) { return res; });
+    };
+    BrainDataService.prototype.getTen = function () {
+        return this.http.get('http://localhost:3000/brainSlicer/ten')
+            .map(function (response) { return response.json(); })
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["a" /* Observable */].throw(error.json().error || 'Server error'); });
     };
     BrainDataService = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["A" /* Injectable */])(),

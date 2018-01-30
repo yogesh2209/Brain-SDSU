@@ -222,7 +222,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-//import {Http} from '@angular/http';
 
 
 
@@ -230,13 +229,14 @@ var BraincanvasComponent = (function () {
     function BraincanvasComponent(brainServ) {
         this.brainServ = brainServ;
         this.geometry = new __WEBPACK_IMPORTED_MODULE_2_three__["Geometry"]();
+        this.items = [];
         this.brainData = [];
         this.group = new __WEBPACK_IMPORTED_MODULE_2_three__["Group"]();
     }
     BraincanvasComponent.prototype.ngOnInit = function () {
         this.render = this.render.bind(this);
-        //this.loadBrainData();
-        //this.loadMockBrainData();
+        // this.loadBrainData();
+        this.loadMockBrainData();
     };
     BraincanvasComponent.prototype.loadMockBrainData = function () {
         this.brainData = this.brainServ.getBrainDataMock();
@@ -245,13 +245,14 @@ var BraincanvasComponent = (function () {
     };
     BraincanvasComponent.prototype.loadBrainData = function () {
         var _this = this;
-        //Get all lists from server and update the lists property
+        // Get all lists from server and update the lists property
         this.brainServ.getTen()
             .subscribe(function (response) {
             _this.brainData = response;
             console.log('brain data');
             console.log(_this.brainData);
             console.log(_this.brainData.length);
+            _this.startRendering(_this.brainData);
         });
     };
     Object.defineProperty(BraincanvasComponent.prototype, "canvas", {
@@ -284,7 +285,9 @@ var BraincanvasComponent = (function () {
     BraincanvasComponent.prototype.getRandomInt = function (max) {
         return Math.floor(Math.random() * Math.floor(max));
     };
-    BraincanvasComponent.prototype.startRendering = function () {
+    BraincanvasComponent.prototype.startRendering = function (jsonArray) {
+        console.log(jsonArray);
+        console.log('checking for json array');
         this.renderer = new __WEBPACK_IMPORTED_MODULE_2_three__["WebGLRenderer"]({
             canvas: this.canvas,
             antialias: true
@@ -295,15 +298,13 @@ var BraincanvasComponent = (function () {
         this.renderer.shadowMap.type = __WEBPACK_IMPORTED_MODULE_2_three__["PCFSoftShadowMap"];
         this.renderer.setClearColor(0xffffff, 1);
         this.renderer.autoClear = true;
-        //Get all lists from server and update the lists property
-        this.loadBrainData();
-        console.log('brain data length: ');
-        console.log(this.brainData.length);
-        for (var i = 0; i < this.brainData.length; i++) {
-            var particle = this.brainData[i];
+        // Get all lists from server and update the lists property
+        // console.log('brain data length checked by yogesh: ');
+        for (var i = 0; i < jsonArray.length; i++) {
+            var particle = jsonArray[i];
             this.geometry.vertices.push(new __WEBPACK_IMPORTED_MODULE_2_three__["Vector3"](particle.x, particle.y, particle.z));
         }
-        //replace me with BrainData service
+        // replace me with BrainData service
         /*
         for (let i = 0; i < 900; i++) {
           this.geometry.vertices.push(new THREE.Vector3(this.getRandomInt(85), this.getRandomInt(100) , this.getRandomInt(200)));
@@ -385,7 +386,8 @@ var BraincanvasComponent = (function () {
     BraincanvasComponent.prototype.ngAfterViewInit = function () {
         this.createScene();
         this.createCamera();
-        this.startRendering();
+        //  this.startRendering();
+        this.loadBrainData();
         this.addControls();
     };
     __decorate([

@@ -1,13 +1,14 @@
 import {Component, AfterViewInit, ElementRef, ViewChild, HostListener, OnInit} from '@angular/core';
 import './js/EnableThreeExamples';
 import * as THREE from 'three';
-//import {Http} from '@angular/http';
+
+
 import 'three/examples/js/controls/OrbitControls';
 import 'three/examples/js/loaders/ColladaLoader';
 import { BrainDataService } from './../../services/brain-data.service';
-import { BrainData } from './../../models/brain-data'
+import { BrainData } from './../../models/brain-data';
 
-//Test express connection
+// Test express connection
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { error } from 'three';
 
@@ -16,7 +17,7 @@ import { error } from 'three';
   templateUrl: './braincanvas.component.html',
   styleUrls: ['./braincanvas.component.css']
 })
-export class BraincanvasComponent implements AfterViewInit {
+export class BraincanvasComponent implements OnInit, AfterViewInit {
   public renderer: THREE.WebGLRenderer;
   public camera: THREE.PerspectiveCamera;
   public scene: THREE.Scene;
@@ -26,7 +27,6 @@ export class BraincanvasComponent implements AfterViewInit {
   public particles;
   public texture;
   public geometry = new THREE.Geometry();
-
   public brainData: BrainData[] = [];
 
   @ViewChild('canvas1') canvas1;
@@ -34,10 +34,16 @@ export class BraincanvasComponent implements AfterViewInit {
 
   constructor(private brainServ: BrainDataService) {}
 
+  /* LIFECYCLE */
   ngOnInit() {
     this.render = this.render.bind(this);
-    //this.loadBrainData();
-    //this.loadMockBrainData();
+    this.loadMockBrainData();
+  }
+  ngAfterViewInit() {
+    this.createScene();
+    this.createCamera();
+    this.loadBrainData();
+    this.addControls();
   }
   public loadMockBrainData() {
     this.brainData = this.brainServ.getBrainDataMock();
@@ -46,16 +52,14 @@ export class BraincanvasComponent implements AfterViewInit {
   }
 
   public loadBrainData() {
-    //Get all lists from server and update the lists property
+   // Get all lists from server and update the lists property
     this.brainServ.getTen()
       .subscribe(
         response => {this.brainData = response;
-                     console.log('brain data');
-                     console.log(this.brainData)
-                     console.log(this.brainData.length)}
-      )
+                     this.startRendering(this.brainData);
+        }
+      );
   }
-  
   public get canvas(): HTMLCanvasElement {
     return this.canvas1.nativeElement;
   }
@@ -82,7 +86,8 @@ export class BraincanvasComponent implements AfterViewInit {
    getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
   }
-  public startRendering() {
+  public startRendering(jsonArray: any) {
+    console.log(jsonArray);
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
       antialias: true
@@ -94,23 +99,12 @@ export class BraincanvasComponent implements AfterViewInit {
     this.renderer.setClearColor(0xffffff, 1);
     this.renderer.autoClear = true;
 
-    //Get all lists from server and update the lists property
-    this.loadBrainData();
-    console.log('brain data length: ')
-    console.log(this.brainData.length);
-    for (let i = 0; i < this.brainData.length; i++) {
-      let particle = this.brainData[i]
+    // Get all lists from server and update the lists property
+    // console.log('brain data length checked by yogesh: ');
+    for (let i = 0; i < jsonArray.length; i++) {
+      const particle = jsonArray[i];
       this.geometry.vertices.push(new THREE.Vector3(particle.x, particle.y , particle.z));
     }
-
-
-    //replace me with BrainData service
-    /*
-    for (let i = 0; i < 900; i++) {
-      this.geometry.vertices.push(new THREE.Vector3(this.getRandomInt(85), this.getRandomInt(100) , this.getRandomInt(200)));
-    }
-    */
-
     this.texture = new THREE.TextureLoader().load( 'assets/disc.png' );
     this.material = new THREE.PointsMaterial({size: 24, sizeAttenuation: true, map: this.texture, alphaTest: 0.5, transparent: false});
     this.material.color.setHSL(1.0, 0.6 , 0.4 );
@@ -142,7 +136,7 @@ export class BraincanvasComponent implements AfterViewInit {
    // this.findAllObjects(obj, this.scene);
     const intersects = raycaster.intersectObjects(obj);
     console.log('Scene has ' + obj.length + ' objects');
-    console.log(intersects.length + ' intersected objects found')
+    console.log(intersects.length + ' intersected objects found');
     intersects.forEach((i) => {
       console.log(i.object); // do what you want to do with object
     });
@@ -172,23 +166,16 @@ export class BraincanvasComponent implements AfterViewInit {
   }
   @HostListener('window:resize', ['$event'])
   public onResize(event: Event) {
-  //  this.canvas.style.width = '100%';
-  //  this.canvas.style.height = '100%';
-  //  console.log('onResize: ' + this.canvas.clientWidth + ', ' + this.canvas.clientHeight);
-   // this.camera.aspect = this.getAspectRatio();
-  //  this.camera.updateProjectionMatrix();
- //   this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
- //   this.render();
+   this.canvas.style.width = '100%';
+   this.canvas.style.height = '100%';
+   console.log('onResize: ' + this.canvas.clientWidth + ', ' + this.canvas.clientHeight);
+   this.camera.aspect = this.getAspectRatio();
+   this.camera.updateProjectionMatrix();
+   this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
+   this.render();
   }
   @HostListener('document:keypress', ['$event'])
   public onKeyPress(event: KeyboardEvent) {
     console.log('onKeyPress: ' + event.key);
-  }
-  /* LIFECYCLE */
-  ngAfterViewInit() {
-     this.createScene();
-     this.createCamera();
-     this.startRendering();
-     this.addControls();
   }
 }

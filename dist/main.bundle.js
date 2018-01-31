@@ -229,29 +229,32 @@ var BraincanvasComponent = (function () {
     function BraincanvasComponent(brainServ) {
         this.brainServ = brainServ;
         this.geometry = new __WEBPACK_IMPORTED_MODULE_2_three__["Geometry"]();
-        this.items = [];
         this.brainData = [];
         this.group = new __WEBPACK_IMPORTED_MODULE_2_three__["Group"]();
     }
+    /* LIFECYCLE */
     BraincanvasComponent.prototype.ngOnInit = function () {
         this.render = this.render.bind(this);
-        // this.loadBrainData();
-        this.loadMockBrainData();
+        //this.loadMockBrainData();
+    };
+    BraincanvasComponent.prototype.ngAfterViewInit = function () {
+        this.createScene();
+        this.createCamera();
+        this.initBrainData();
+        this.addControls();
     };
     BraincanvasComponent.prototype.loadMockBrainData = function () {
         this.brainData = this.brainServ.getBrainDataMock();
         console.log('Mock brain data:');
         console.log(this.brainData);
     };
-    BraincanvasComponent.prototype.loadBrainData = function () {
+    BraincanvasComponent.prototype.initBrainData = function () {
         var _this = this;
         // Get all lists from server and update the lists property
-        this.brainServ.getTen()
+        //this.brainServ.getCatagorySlice(49)
+        this.brainServ.getAll()
             .subscribe(function (response) {
             _this.brainData = response;
-            console.log('brain data');
-            console.log(_this.brainData);
-            console.log(_this.brainData.length);
             _this.startRendering(_this.brainData);
         });
     };
@@ -286,8 +289,6 @@ var BraincanvasComponent = (function () {
         return Math.floor(Math.random() * Math.floor(max));
     };
     BraincanvasComponent.prototype.startRendering = function (jsonArray) {
-        console.log(jsonArray);
-        console.log('checking for json array');
         this.renderer = new __WEBPACK_IMPORTED_MODULE_2_three__["WebGLRenderer"]({
             canvas: this.canvas,
             antialias: true
@@ -304,14 +305,8 @@ var BraincanvasComponent = (function () {
             var particle = jsonArray[i];
             this.geometry.vertices.push(new __WEBPACK_IMPORTED_MODULE_2_three__["Vector3"](particle.x, particle.y, particle.z));
         }
-        // replace me with BrainData service
-        /*
-        for (let i = 0; i < 900; i++) {
-          this.geometry.vertices.push(new THREE.Vector3(this.getRandomInt(85), this.getRandomInt(100) , this.getRandomInt(200)));
-        }
-        */
         this.texture = new __WEBPACK_IMPORTED_MODULE_2_three__["TextureLoader"]().load('assets/disc.png');
-        this.material = new __WEBPACK_IMPORTED_MODULE_2_three__["PointsMaterial"]({ size: 24, sizeAttenuation: true, map: this.texture, alphaTest: 0.5, transparent: false });
+        this.material = new __WEBPACK_IMPORTED_MODULE_2_three__["PointsMaterial"]({ size: 12, sizeAttenuation: true, map: this.texture, alphaTest: 0.5, transparent: false });
         this.material.color.setHSL(1.0, 0.6, 0.4);
         this.particles = new __WEBPACK_IMPORTED_MODULE_2_three__["Points"](this.geometry, this.material);
         this.scene.add(this.particles);
@@ -371,24 +366,16 @@ var BraincanvasComponent = (function () {
         return this.canvas.clientWidth / this.canvas.clientHeight;
     };
     BraincanvasComponent.prototype.onResize = function (event) {
-        //  this.canvas.style.width = '100%';
-        //  this.canvas.style.height = '100%';
-        //  console.log('onResize: ' + this.canvas.clientWidth + ', ' + this.canvas.clientHeight);
-        // this.camera.aspect = this.getAspectRatio();
-        //  this.camera.updateProjectionMatrix();
-        //   this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
-        //   this.render();
+        this.canvas.style.width = '100%';
+        this.canvas.style.height = '100%';
+        console.log('onResize: ' + this.canvas.clientWidth + ', ' + this.canvas.clientHeight);
+        this.camera.aspect = this.getAspectRatio();
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
+        this.render();
     };
     BraincanvasComponent.prototype.onKeyPress = function (event) {
         console.log('onKeyPress: ' + event.key);
-    };
-    /* LIFECYCLE */
-    BraincanvasComponent.prototype.ngAfterViewInit = function () {
-        this.createScene();
-        this.createCamera();
-        //  this.startRendering();
-        this.loadBrainData();
-        this.addControls();
     };
     __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_8" /* ViewChild */])('canvas1'),
@@ -822,8 +809,8 @@ var BrainDataService = (function () {
     function BrainDataService(http) {
         this.http = http;
         this.serverApi = 'http://localhost:3000';
-        this.BRAINDATA = [{ "catagory": 49, "color": 108, "vertexNumber": 722021, "x": 75, "y": 33, "z": 73 },
-            { "catagory": 49, "color": 110, "vertexNumber": 722022, "x": 76, "y": 33, "z": 73 }];
+        this.BRAINDATA = [{ 'catagory': 49, 'color': 108, 'vertexNumber': 722021, 'x': 75, 'y': 33, 'z': 73 },
+            { 'catagory': 49, 'color': 110, 'vertexNumber': 722022, 'x': 76, 'y': 33, 'z': 73 }];
     }
     BrainDataService.prototype.getBrainDataMock = function () {
         return this.BRAINDATA;
@@ -836,6 +823,36 @@ var BrainDataService = (function () {
     };
     BrainDataService.prototype.getTen = function () {
         return this.http.get('http://localhost:3000/brainSlicer/ten')
+            .map(function (response) { return response.json(); })
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["a" /* Observable */].throw(error.json().error || 'Server error'); });
+    };
+    BrainDataService.prototype.getXSlice = function (x) {
+        var queryStr = 'http://localhost:3000/brainSlicer/xSlice/' + String(x);
+        return this.http.get(queryStr)
+            .map(function (response) { return response.json(); })
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["a" /* Observable */].throw(error.json().error || 'Server error'); });
+    };
+    BrainDataService.prototype.getYSlice = function (y) {
+        var queryStr = 'http://localhost:3000/brainSlicer/ySlice/' + String(y);
+        return this.http.get(queryStr)
+            .map(function (response) { return response.json(); })
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["a" /* Observable */].throw(error.json().error || 'Server error'); });
+    };
+    BrainDataService.prototype.getZSlice = function (z) {
+        var queryStr = 'http://localhost:3000/brainSlicer/zSlice/' + String(z);
+        return this.http.get(queryStr)
+            .map(function (response) { return response.json(); })
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["a" /* Observable */].throw(error.json().error || 'Server error'); });
+    };
+    BrainDataService.prototype.getCatagorySlice = function (catagory) {
+        var queryStr = 'http://localhost:3000/brainSlicer/catagorySlice/' + String(catagory);
+        return this.http.get(queryStr)
+            .map(function (response) { return response.json(); })
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["a" /* Observable */].throw(error.json().error || 'Server error'); });
+    };
+    BrainDataService.prototype.getAll = function () {
+        var queryStr = 'http://localhost:3000/brainSlicer/all';
+        return this.http.get(queryStr)
             .map(function (response) { return response.json(); })
             .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["a" /* Observable */].throw(error.json().error || 'Server error'); });
     };

@@ -30,4 +30,38 @@ export class BrainDataService {
             .catch((error: any) => Observable.throw(error.json().error || 'Server error'));
   }
 
+  public getXSlice(x): Observable<BrainData[]> {
+    const queryStr = 'http://localhost:3000/brainSlicer/xSlice/' + String(x);
+    return this.http.get(queryStr)
+        .map((response: Response) => response.json())
+            .catch((error: any) => Observable.throw(error.json().error || 'Server error'));
+  }
+
+  public getYSlice(y): Observable<BrainData[]> {
+    const queryStr = 'http://localhost:3000/brainSlicer/ySlice/' + String(y);
+    return this.http.get(queryStr)
+        .map((response: Response) => response.json())
+            .catch((error: any) => Observable.throw(error.json().error || 'Server error'));
+  }
+
+  public getZSlice(z): Observable<BrainData[]> {
+    const queryStr = 'http://localhost:3000/brainSlicer/zSlice/' + String(z);
+    return this.http.get(queryStr)
+        .map((response: Response) => response.json())
+            .catch((error: any) => Observable.throw(error.json().error || 'Server error'));
+  }
+
+  public getCatagorySlice(catagory): Observable<BrainData[]> {
+    const queryStr = 'http://localhost:3000/brainSlicer/catagorySlice/' + String(catagory);
+    return this.http.get(queryStr)
+        .map((response: Response) => response.json())
+            .catch((error: any) => Observable.throw(error.json().error || 'Server error'));
+  }
+
+  public getAll(): Observable<BrainData[]> {
+    const queryStr = 'http://localhost:3000/brainSlicer/all'
+    return this.http.get(queryStr)
+        .map((response: Response) => response.json())
+            .catch((error: any) => Observable.throw(error.json().error || 'Server error'));
+  }
 }

@@ -37,12 +37,12 @@ export class BraincanvasComponent implements OnInit, AfterViewInit {
   /* LIFECYCLE */
   ngOnInit() {
     this.render = this.render.bind(this);
-    this.loadMockBrainData();
+    //this.loadMockBrainData();
   }
   ngAfterViewInit() {
     this.createScene();
     this.createCamera();
-    this.loadBrainData();
+    this.initBrainData();
     this.addControls();
   }
   public loadMockBrainData() {
@@ -51,9 +51,10 @@ export class BraincanvasComponent implements OnInit, AfterViewInit {
     console.log(this.brainData);
   }
 
-  public loadBrainData() {
+  public initBrainData() {
    // Get all lists from server and update the lists property
-    this.brainServ.getTen()
+    //this.brainServ.getCatagorySlice(49)
+    this.brainServ.getAll()
       .subscribe(
         response => {this.brainData = response;
                      this.startRendering(this.brainData);
@@ -87,7 +88,6 @@ export class BraincanvasComponent implements OnInit, AfterViewInit {
     return Math.floor(Math.random() * Math.floor(max));
   }
   public startRendering(jsonArray: any) {
-    console.log(jsonArray);
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
       antialias: true
@@ -106,7 +106,7 @@ export class BraincanvasComponent implements OnInit, AfterViewInit {
       this.geometry.vertices.push(new THREE.Vector3(particle.x, particle.y , particle.z));
     }
     this.texture = new THREE.TextureLoader().load( 'assets/disc.png' );
-    this.material = new THREE.PointsMaterial({size: 24, sizeAttenuation: true, map: this.texture, alphaTest: 0.5, transparent: false});
+    this.material = new THREE.PointsMaterial({size: 12, sizeAttenuation: true, map: this.texture, alphaTest: 0.5, transparent: false});
     this.material.color.setHSL(1.0, 0.6 , 0.4 );
     this.particles = new THREE.Points(this.geometry, this.material);
     this.scene.add(this.particles);
